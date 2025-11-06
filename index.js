@@ -6,55 +6,18 @@ const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const quizRoutes = require("./routes/quizRoutes");
 const swaggerUi = require("swagger-ui-express");
+const swaggerFile = require("./swagger-output.json");
 
 const app = express();
 
-function loadSwaggerSpec() {
-  try {
-    const staticSpec = require("./swagger-output.json");
-    if (staticSpec && Object.keys(staticSpec).length) return staticSpec;
-  } catch (err) {
-    console.warn("Could not load ./swagger-output.json:", err.message);
-  }
-
-  try {
-    const spec = require("./swaggerConfig");
-    if (spec && Object.keys(spec).length) return spec;
-  } catch (err) {
-    console.warn("Could not load ./swaggerConfig:", err.message);
-  }
-
-  return {
-    openapi: "3.0.0",
-    info: {
-      title: "MTH Backend API (fallback)",
-      version: "0.0.0",
-      description:
-        "The real OpenAPI spec couldn't be loaded in this environment.",
-    },
-    paths: {},
-  };
-}
-
-const swaggerSpec = loadSwaggerSpec();
-(async () => {
-  try {
-    await connectDB();
-    console.log("MongoDB connected");
-  } catch (err) {
-    console.error(
-      "MongoDB connection error (continuing without DB):",
-      err.message
-    );
-  }
-})();
+// Connect to MongoDB
+connectDB();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -88,11 +51,6 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Only start the server when run directly, export app for serverless or tests
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
-
-module.exports = app;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
