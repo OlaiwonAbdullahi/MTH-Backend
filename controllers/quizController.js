@@ -8,11 +8,11 @@ const crypto = require("crypto");
 exports.getQuizQuestions = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
-    const category = req.query.category;
+    const course = req.query.course;
     const difficulty = req.query.difficulty;
 
     const query = { isActive: true };
-    if (category) query.category = category;
+    if (course) query.course = course;
     if (difficulty) query.difficulty = difficulty;
 
     const questions = await Question.aggregate([
@@ -142,7 +142,7 @@ exports.submitQuiz = async (req, res) => {
 // @access  Public
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await Question.distinct("category", { isActive: true });
+    const categories = await Question.distinct("course", { isActive: true });
 
     res.json({
       success: true,
@@ -162,16 +162,16 @@ exports.getCategories = async (req, res) => {
 exports.getStatistics = async (req, res) => {
   try {
     const totalQuestions = await Question.countDocuments({ isActive: true });
-    const categories = await Question.distinct("category", { isActive: true });
+    const categories = await Question.distinct("course", { isActive: true });
 
     const difficultyCounts = await Question.aggregate([
       { $match: { isActive: true } },
       { $group: { _id: "$difficulty", count: { $sum: 1 } } },
     ]);
 
-    const categoryCounts = await Question.aggregate([
+    const courseCounts = await Question.aggregate([
       { $match: { isActive: true } },
-      { $group: { _id: "$category", count: { $sum: 1 } } },
+      { $group: { _id: "$course", count: { $sum: 1 } } },
     ]);
 
     res.json({
@@ -179,8 +179,8 @@ exports.getStatistics = async (req, res) => {
       data: {
         totalQuestions,
         totalCategories: categories.length,
-        categories: categoryCounts.map((c) => ({
-          category: c._id,
+        categories: courseCounts.map((c) => ({
+          course: c._id,
           count: c.count,
         })),
         difficulty: difficultyCounts.map((d) => ({
@@ -233,10 +233,10 @@ exports.getLeaderboard = async (req, res) => {
 // @access  Public
 exports.startQuiz = async (req, res) => {
   try {
-    const { userName, limit, category, difficulty } = req.body;
+    const { userName, limit, course, difficulty } = req.body;
 
     const query = { isActive: true };
-    if (category) query.category = category;
+    if (course) query.course = course;
     if (difficulty) query.difficulty = difficulty;
 
     const questionLimit = parseInt(limit) || 10;
@@ -275,7 +275,7 @@ exports.startQuiz = async (req, res) => {
         _id: q._id,
         question: q.question,
         options: q.options,
-        category: q.category,
+        course: q.course,
         difficulty: q.difficulty,
         points: q.points,
       })),

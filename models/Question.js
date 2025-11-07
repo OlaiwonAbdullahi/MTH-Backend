@@ -27,9 +27,9 @@ const questionSchema = new mongoose.Schema(
         message: "Correct answer must be a valid option index",
       },
     },
-    category: {
+    course: {
       type: String,
-      required: [true, "Category is required"],
+      required: [true, "course is required"],
       trim: true,
     },
     difficulty: {
@@ -56,6 +56,6 @@ const questionSchema = new mongoose.Schema(
 );
 
 // Index for faster queries
-questionSchema.index({ category: 1, difficulty: 1, isActive: 1 });
+questionSchema.index({ course: 1, difficulty: 1, isActive: 1 });
 
 module.exports = mongoose.model("Question", questionSchema);

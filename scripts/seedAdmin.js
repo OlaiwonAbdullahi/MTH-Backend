@@ -19,7 +19,7 @@ const seedAdmin = async () => {
     const admin = await Admin.create({
       username: "admin",
       email: "admin@quiz.com",
-      password: "admin123", // Change this password!
+      password: "admin123",
     });
 
     console.log("Admin created successfully");

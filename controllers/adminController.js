@@ -9,13 +9,13 @@ exports.createQuestion = async (req, res) => {
       question,
       options,
       correctAnswer,
-      category,
+      course,
       difficulty,
       points,
       explanation,
     } = req.body;
 
-    if (!question || !options || correctAnswer === undefined || !category) {
+    if (!question || !options || correctAnswer === undefined || !course) {
       return res.status(400).json({
         success: false,
         message: "Please provide all required fields",
@@ -26,7 +26,7 @@ exports.createQuestion = async (req, res) => {
       question,
       options,
       correctAnswer,
-      category,
+      course,
       difficulty: difficulty || "medium",
       points: points || 10,
       explanation,
@@ -51,12 +51,12 @@ exports.getAllQuestions = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const category = req.query.category;
+    const course = req.query.course;
     const difficulty = req.query.difficulty;
     const isActive = req.query.isActive;
 
     const query = {};
-    if (category) query.category = category;
+    if (course) query.course = course;
     if (difficulty) query.difficulty = difficulty;
     if (isActive !== undefined) query.isActive = isActive === "true";
 
