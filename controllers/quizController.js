@@ -102,32 +102,97 @@ exports.submitQuiz = async (req, res) => {
       });
     }
 
-    // Save session if provided
-    if (sessionId || userName) {
-      const session = new QuizSession({
-        sessionId: sessionId || crypto.randomBytes(16).toString("hex"),
+    // Save or update session
+    let newSessionId = null;
+    if (sessionId) {
+      // Update existing session
+      const session = await QuizSession.findOne({ sessionId });
+      if (session) {
+        // Update questions array with answers, isCorrect, points
+        answers.forEach((ans, idx) => {
+          if (session.questions[idx]) {
+            session.questions[idx].userAnswer = ans.userAnswer;
+            session.questions[idx].isCorrect = results[idx].isCorrect;
+            session.questions[idx].points = results[idx].points;
+          }
+        });
+        session.totalScore = totalScore;
+        session.maxScore = maxScore;
+        session.status = "completed";
+        session.completedAt = new Date();
+        await session.save();
+        newSessionId = sessionId; // Keep existing
+      } else {
+        // Session not found, create new
+        newSessionId = crypto.randomBytes(16).toString("hex");
+        const newSession = new QuizSession({
+          sessionId: newSessionId,
+          userName: userName || "Anonymous",
+          questions: answers.map((ans, idx) => ({
+            questionId: ans.questionId,
+            userAnswer: ans.userAnswer,
+            isCorrect: results[idx].isCorrect,
+            points: results[idx].points,
+          })),
+          totalScore,
+          maxScore,
+          status: "completed",
+          completedAt: new Date(),
+        });
+        await newSession.save();
+      }
+    } else {
+      // No sessionId, create new
+      newSessionId = crypto.randomBytes(16).toString("hex");
+      const newSession = new QuizSession({
+        sessionId: newSessionId,
         userName: userName || "Anonymous",
-        questions: results.map((r) => ({
-          questionId: r.questionId,
-          userAnswer: r.userAnswer,
-          isCorrect: r.isCorrect,
-          points: r.points,
+        questions: answers.map((ans, idx) => ({
+          questionId: ans.questionId,
+          userAnswer: ans.userAnswer,
+          isCorrect: results[idx].isCorrect,
+          points: results[idx].points,
         })),
         totalScore,
         maxScore,
         status: "completed",
         completedAt: new Date(),
       });
+      await newSession.save();
+    }
 
-      await session.save();
+    // Calculate count-based metrics for frontend compatibility
+    const totalQuestions = answers.length;
+    const correctCount = results.filter((r) => r.isCorrect).length;
+    const wrongCount = totalQuestions - correctCount;
+
+    // Calculate timeTaken if session exists
+    let timeTaken = null;
+    if (sessionId || newSessionId) {
+      const existingSession = await QuizSession.findOne({
+        sessionId: sessionId || newSessionId,
+      });
+      if (existingSession && existingSession.createdAt) {
+        const timeInSeconds = Math.round(
+          (new Date() - existingSession.createdAt) / 1000
+        );
+        timeTaken = `${Math.floor(timeInSeconds / 60)} min ${
+          timeInSeconds % 60
+        } sec`;
+      }
     }
 
     res.json({
       success: true,
-      totalScore,
-      maxScore,
-      percentage: maxScore > 0 ? ((totalScore / maxScore) * 100).toFixed(2) : 0,
-      results,
+      score: correctCount, // Number of correct answers
+      totalQuestions,
+      correctAnswers: correctCount,
+      wrongAnswers: wrongCount,
+      totalScore, // Points-based total
+      maxScore, // Points-based max
+      timeTaken,
+      percentage: maxScore > 0 ? ((totalScore / maxScore) * 100).toFixed(2) : 0, // Points-based percentage
+      results, // Detailed results array
     });
   } catch (error) {
     res.status(500).json({
@@ -135,9 +200,7 @@ exports.submitQuiz = async (req, res) => {
       message: error.message,
     });
   }
-};
-
-// @desc    Get available categories
+}; // @desc    Get available categories
 // @route   GET /api/quiz/categories
 // @access  Public
 exports.getCategories = async (req, res) => {
