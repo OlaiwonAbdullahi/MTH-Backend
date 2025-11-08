@@ -2,11 +2,11 @@ const swaggerAutogen = require("swagger-autogen")();
 
 const doc = {
   info: {
-    title: "My API",
-    description: "Auto-generated docs",
+    title: "MTH Quiz API",
+    description: "API documentation for the MTH Quiz application",
   },
-  host: "localhost:3000",
-  schemes: ["http"],
+  host: "https://mth-backend-vh63.onrender.com/",
+  schemes: ["https"],
 };
 
 const outputFile = "./swagger-output.json";
