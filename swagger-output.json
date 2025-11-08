@@ -1,17 +1,27 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "My API",
-    "description": "Auto-generated docs",
+    "title": "MTH Quiz API",
+    "description": "API documentation for the MTH Quiz application",
     "version": "1.0.0"
   },
-  "host": "localhost:3000",
+  "host": "https://mth-backend-vh63.onrender.com/",
   "basePath": "/",
   "schemes": [
-    "http"
+    "https"
   ],
   "paths": {
     "/api/health": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/": {
       "get": {
         "description": "",
         "responses": {
@@ -153,7 +163,7 @@
             "type": "string"
           },
           {
-            "name": "category",
+            "name": "course",
             "in": "query",
             "type": "string"
           },
@@ -203,7 +213,7 @@
                 "correctAnswer": {
                   "example": "any"
                 },
-                "category": {
+                "course": {
                   "example": "any"
                 },
                 "difficulty": {
@@ -378,7 +388,7 @@
             "type": "string"
           },
           {
-            "name": "category",
+            "name": "course",
             "in": "query",
             "type": "string"
           },
@@ -520,7 +530,7 @@
                 "limit": {
                   "example": "any"
                 },
-                "category": {
+                "course": {
                   "example": "any"
                 },
                 "difficulty": {
