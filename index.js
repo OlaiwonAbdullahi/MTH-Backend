@@ -17,8 +17,7 @@ const corsOptions = {
     const allowedOrigins = [
       "http://localhost:3000",
       "http://localhost:5173",
-      "http://localhost:4200",
-      "https://mth-backend-six.vercel.app/",
+      "https://mth-backend-vh63.onrender.com/",
     ];
 
     if (allowedOrigins.indexOf(origin) !== -1) {
