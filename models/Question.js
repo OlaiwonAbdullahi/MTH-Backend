@@ -49,10 +49,23 @@ const questionSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    hasLatex: {
+      type: Boolean,
+      default: false,
+    },
+    metadata: {
+      source: {
+        type: String,
+        enum: ["manual", "document", "bulk"],
+        default: "manual",
+      },
+      documentName: String,
+      extractedAt: Date,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Index for faster queries

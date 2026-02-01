@@ -12,6 +12,7 @@
   - [Health Check](#health-check)
   - [Authentication Endpoints](#authentication-endpoints)
   - [Admin Endpoints](#admin-endpoints)
+  - [Question Extraction & Upload (NEW)](#question-extraction--upload-new)
   - [Quiz Endpoints](#quiz-endpoints)
 
 ---
@@ -639,6 +640,114 @@ Authorization: Bearer <access_token>
 
 ---
 
+## Question Extraction & Upload (NEW)
+
+All extraction endpoints require admin authentication.
+
+### 1. Upload Document for Extraction (NEW)
+
+Upload a document (PDF, DOCX, TXT, JSON) to extract questions.
+
+```http
+POST /api/admin/questions/upload
+```
+
+**Access:** Private (Admin only)
+
+**Headers:**
+
+```
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+```
+
+**Request Body (form-data):**
+
+- `file`: The document file
+- `course`: Default course for extracted questions (optional)
+- `difficulty`: Default difficulty (optional)
+- `autoApprove`: If "true", saves questions directly to DB (optional)
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "Questions extracted successfully. Review and approve to save.",
+  "uploadId": "65bc12e4f5...",
+  "totalExtracted": 2,
+  "extractedQuestions": [
+    {
+      "question": "What is the derivative of $x^2$?",
+      "options": ["$2x$", "$x$", "$2$"],
+      "correctAnswer": 0,
+      "hasLatex": true
+    }
+  ]
+}
+```
+
+---
+
+### 2. Get All Uploads (NEW)
+
+Retrieve history of document uploads.
+
+```http
+GET /api/admin/questions/uploads
+```
+
+**Access:** Private (Admin only)
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "data": [...],
+  "pagination": { "page": 1, "total": 5, ... }
+}
+```
+
+---
+
+### 3. Approve Extracted Questions (NEW)
+
+Bulk approve and save questions from an extraction.
+
+```http
+POST /api/admin/questions/uploads/:uploadId/approve
+```
+
+**Access:** Private (Admin only)
+
+**Request Body:**
+
+```json
+{
+  "questions": [
+    {
+      "question": "What is $2+2$?",
+      "options": ["3", "4", "5"],
+      "correctAnswer": 1,
+      "course": "Mathematics"
+    }
+  ]
+}
+```
+
+**Success Response (201):**
+
+```json
+{
+  "success": true,
+  "message": "Questions approved and saved successfully",
+  "count": 1
+}
+```
+
+---
+
 ## Quiz Endpoints
 
 All quiz endpoints are rate-limited (100 requests per 15 minutes per IP).
@@ -1087,6 +1196,12 @@ GET /api/quiz/leaderboard?limit=5
   points: Number,             // Points for correct answer (default: 10)
   explanation: String,        // Explanation of correct answer
   isActive: Boolean,          // Whether question is active (default: true)
+  hasLatex: Boolean,          // (NEW) Whether LaTeX notation is detected
+  metadata: {                 // (NEW) Source tracking
+    source: String,           // "manual", "document", or "bulk"
+    documentName: String,
+    extractedAt: Date
+  },
   createdAt: Date,
   updatedAt: Date
 }
@@ -1118,7 +1233,7 @@ GET /api/quiz/leaderboard?limit=5
 
 ### Admin Model
 
-```javascript
+````javascript
 {
   _id: ObjectId,
   username: String,           // Admin username (min 3 chars)
@@ -1128,7 +1243,25 @@ GET /api/quiz/leaderboard?limit=5
   createdAt: Date,
   updatedAt: Date
 }
-```
+
+### Upload Model (NEW)
+
+```javascript
+{
+  _id: ObjectId,
+  fileName: String,           // Internal filename
+  originalName: String,       // User's filename
+  fileType: String,           // pdf, docx, txt, json
+  fileSize: Number,
+  status: String,             // processing, completed, failed
+  uploadedBy: ObjectId,       // Reference to Admin
+  extractedQuestions: Number,
+  errorMessage: String,
+  createdAt: Date
+}
+````
+
+````
 
 ---
 
@@ -1141,8 +1274,8 @@ The API accepts requests from the following origins:
 - `https://mth-backend-vh63.onrender.com/`
 - `https://mth-dept.vercel.app`
 
-**Allowed Methods:** GET, POST, PUT, DELETE, PATCH, OPTIONS  
-**Allowed Headers:** Content-Type, Authorization  
+**Allowed Methods:** GET, POST, PUT, DELETE, PATCH, OPTIONS
+**Allowed Headers:** Content-Type, Authorization
 **Credentials:** Enabled
 
 ---
@@ -1157,7 +1290,9 @@ MONGODB_URI=<your_mongodb_connection_string>
 JWT_SECRET=<your_jwt_secret>
 JWT_EXPIRE=<access_token_expiry>        # e.g., "1h", "30m"
 JWT_REFRESH_EXPIRE=<refresh_token_expiry>  # e.g., "7d", "30d"
-```
+MAX_FILE_SIZE=10485760                  # (NEW) Max upload size (10MB)
+UPLOAD_DIR=uploads/documents            # (NEW) Storage path
+````
 
 ---
 

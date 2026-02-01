@@ -5,6 +5,7 @@ const connectDB = require("./config/database");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const quizRoutes = require("./routes/quizRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require("./swagger-output.json");
 const app = express();
@@ -44,6 +45,7 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin/questions", uploadRoutes);
 app.use("/api/quiz", quizRoutes);
 
 app.get("/api/health", (req, res) => {
