@@ -37,6 +37,7 @@ exports.uploadDocument = async (req, res) => {
 
     try {
       // Extract text from document
+      console.log(`Processing file: ${req.file.path}`);
       // Note: for JSON, extractText returns the parsed object
       const extractedContent = await extractText(req.file.path, fileType);
 

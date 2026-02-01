@@ -3,7 +3,15 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/documents");
+    const uploadDir = path.resolve(
+      process.env.UPLOAD_DIR || "uploads/documents",
+    );
+    // Create directory if it doesn't exist
+    const fs = require("fs");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);

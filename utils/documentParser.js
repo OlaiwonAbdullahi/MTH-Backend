@@ -7,11 +7,13 @@ const fs = require("fs").promises;
  */
 async function extractFromPDF(filePath) {
   try {
+    console.log(`Reading PDF file at: ${filePath}`);
     const dataBuffer = await fs.readFile(filePath);
     const data = await pdfParse(dataBuffer);
     return data.text;
   } catch (error) {
-    throw new Error(`PDF extraction failed: ${error.message}`);
+    console.error(`Error reading file at ${filePath}:`, error);
+    throw new Error(`PDF extraction failed at ${filePath}: ${error.message}`);
   }
 }
 
@@ -20,10 +22,12 @@ async function extractFromPDF(filePath) {
  */
 async function extractFromDOCX(filePath) {
   try {
+    console.log(`Reading DOCX file at: ${filePath}`);
     const result = await mammoth.extractRawText({ path: filePath });
     return result.value;
   } catch (error) {
-    throw new Error(`DOCX extraction failed: ${error.message}`);
+    console.error(`Error reading DOCX at ${filePath}:`, error);
+    throw new Error(`DOCX extraction failed at ${filePath}: ${error.message}`);
   }
 }
 
@@ -32,9 +36,11 @@ async function extractFromDOCX(filePath) {
  */
 async function extractFromTXT(filePath) {
   try {
+    console.log(`Reading TXT file at: ${filePath}`);
     return await fs.readFile(filePath, "utf-8");
   } catch (error) {
-    throw new Error(`TXT extraction failed: ${error.message}`);
+    console.error(`Error reading TXT at ${filePath}:`, error);
+    throw new Error(`TXT extraction failed at ${filePath}: ${error.message}`);
   }
 }
 
@@ -43,10 +49,12 @@ async function extractFromTXT(filePath) {
  */
 async function extractFromJSON(filePath) {
   try {
+    console.log(`Reading JSON file at: ${filePath}`);
     const content = await fs.readFile(filePath, "utf-8");
     return JSON.parse(content);
   } catch (error) {
-    throw new Error(`JSON parsing failed: ${error.message}`);
+    console.error(`Error reading JSON at ${filePath}:`, error);
+    throw new Error(`JSON parsing failed at ${filePath}: ${error.message}`);
   }
 }
 
