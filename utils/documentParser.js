@@ -1,4 +1,4 @@
-const pdfParse = require("pdf-parse");
+const pdfParse = require("pdf-parse").default || require("pdf-parse");
 const mammoth = require("mammoth");
 const fs = require("fs").promises;
 
