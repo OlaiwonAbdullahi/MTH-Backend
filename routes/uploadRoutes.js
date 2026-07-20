@@ -6,6 +6,7 @@ const {
   uploadDocument,
   getUploadDetails,
   approveQuestions,
+  rejectUpload,
   getUploads,
 } = require("../controllers/uploadController");
 
@@ -16,5 +17,6 @@ router.post("/upload", upload.single("file"), uploadDocument);
 router.get("/uploads", getUploads);
 router.get("/uploads/:uploadId", getUploadDetails);
 router.post("/uploads/:uploadId/approve", approveQuestions);
+router.delete("/uploads/:uploadId", rejectUpload);
 
 module.exports = router;

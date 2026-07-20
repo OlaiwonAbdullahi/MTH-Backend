@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /pdf|docx|txt|json/;
+  const allowedTypes = /pdf|docx|txt|json|csv/;
   const extname = allowedTypes.test(
     path.extname(file.originalname).toLowerCase(),
   );
@@ -31,7 +31,7 @@ const fileFilter = (req, file, cb) => {
   if (extname) {
     return cb(null, true);
   } else {
-    cb(new Error("Only PDF, DOCX, TXT, and JSON files are allowed"));
+    cb(new Error("Only PDF, DOCX, TXT, CSV, and JSON files are allowed"));
   }
 };
 

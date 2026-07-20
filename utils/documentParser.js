@@ -68,6 +68,7 @@ async function extractText(filePath, fileType) {
     case "docx":
       return await extractFromDOCX(filePath);
     case "txt":
+    case "csv":
       return await extractFromTXT(filePath);
     case "json":
       return await extractFromJSON(filePath);

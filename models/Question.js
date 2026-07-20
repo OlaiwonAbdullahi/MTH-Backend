@@ -56,7 +56,7 @@ const questionSchema = new mongoose.Schema(
     metadata: {
       source: {
         type: String,
-        enum: ["manual", "document", "bulk"],
+        enum: ["manual", "document", "bulk", "ai"],
         default: "manual",
       },
       documentName: String,

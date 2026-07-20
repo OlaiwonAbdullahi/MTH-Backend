@@ -12,7 +12,7 @@ const uploadSchema = new mongoose.Schema(
     },
     fileType: {
       type: String,
-      enum: ["pdf", "docx", "txt", "json"],
+      enum: ["pdf", "docx", "txt", "json", "csv"],
       required: true,
     },
     fileSize: Number,
@@ -24,12 +24,27 @@ const uploadSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["processing", "completed", "failed"],
+      enum: ["processing", "completed", "failed", "approved", "rejected"],
       default: "processing",
+    },
+    extractionMethod: {
+      type: String,
+      enum: ["ai", "pattern", "json", "csv"],
     },
     extractedQuestions: {
       type: Number,
       default: 0,
+    },
+    skippedBlocks: {
+      type: Number,
+      default: 0,
+    },
+    // Persisted preview of extracted questions so an admin can come back
+    // and review/edit before approving, instead of only seeing them in
+    // the immediate upload response.
+    questions: {
+      type: [mongoose.Schema.Types.Mixed],
+      default: undefined,
     },
     errorMessage: String,
   },
