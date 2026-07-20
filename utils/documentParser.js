@@ -1,4 +1,4 @@
-const pdfParse = require("pdf-parse").default || require("pdf-parse");
+const { PDFParse } = require("pdf-parse");
 const mammoth = require("mammoth");
 const fs = require("fs").promises;
 
@@ -6,14 +6,18 @@ const fs = require("fs").promises;
  * Extract text from PDF file
  */
 async function extractFromPDF(filePath) {
+  let parser;
   try {
     console.log(`Reading PDF file at: ${filePath}`);
     const dataBuffer = await fs.readFile(filePath);
-    const data = await pdfParse(dataBuffer);
-    return data.text;
+    parser = new PDFParse({ data: dataBuffer });
+    const result = await parser.getText();
+    return result.text;
   } catch (error) {
     console.error(`Error reading file at ${filePath}:`, error);
     throw new Error(`PDF extraction failed at ${filePath}: ${error.message}`);
+  } finally {
+    if (parser) await parser.destroy();
   }
 }
 
